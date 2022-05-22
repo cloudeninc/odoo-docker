@@ -6,6 +6,11 @@ if [ -v PASSWORD_FILE ]; then
     PASSWORD="$(< $PASSWORD_FILE)"
 fi
 
+if [ -v ODOO_PYTHON_REQUIREMENTS -a -f "$ODOO_PYTHON_REQUIREMENTS" ]; then
+    # Install python requirements from specified requirements.txt file
+    pip install -r "$ODOO_PYTHON_REQUIREMENTS"
+fi
+
 # set the postgres database host, port, user and password according to the environment
 # and pass them as arguments to the odoo process if not present in the config file
 : ${HOST:=${DB_PORT_5432_TCP_ADDR:='db'}}
@@ -17,7 +22,7 @@ DB_ARGS=()
 function check_config() {
     param="$1"
     value="$2"
-    if grep -q -E "^\s*\b${param}\b\s*=" "$ODOO_RC" ; then       
+    if grep -q -E "^\s*\b${param}\b\s*=" "$ODOO_RC" ; then
         value=$(grep -E "^\s*\b${param}\b\s*=" "$ODOO_RC" |cut -d " " -f3|sed 's/["\n\r]//g')
     fi;
     DB_ARGS+=("--${param}")
